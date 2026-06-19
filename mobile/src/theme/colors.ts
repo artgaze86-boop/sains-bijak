@@ -1,0 +1,56 @@
+export const colors = {
+  primary: '#4CAF50',
+  primaryDark: '#388E3C',
+  primaryLight: '#C8E6C9',
+  secondary: '#FF9800',
+  secondaryDark: '#F57C00',
+  accent: '#2196F3',
+  purple: '#9C27B0',
+  pink: '#E91E63',
+  background: '#F5F9F5',
+  surface: '#FFFFFF',
+  text: '#1B1B1B',
+  textSecondary: '#5A5A5A',
+  textLight: '#FFFFFF',
+  border: '#E0E0E0',
+  success: '#4CAF50',
+  error: '#F44336',
+  warning: '#FFC107',
+  info: '#2196F3',
+  disabled: '#BDBDBD',
+  overlay: 'rgba(0, 0, 0, 0.5)',
+};
+
+export const yearColors: Record<number, string> = {
+  1: '#FF6B6B',
+  2: '#4ECDC4',
+  3: '#45B7D1',
+  4: '#96CEB4',
+  5: '#FFEAA7',
+  6: '#DDA0DD',
+};
+
+export const highContrastColors = {
+  primary: '#006400',
+  primaryDark: '#004D00',
+  primaryLight: '#90EE90',
+  secondary: '#CC6600',
+  secondaryDark: '#994D00',
+  accent: '#0000CD',
+  purple: '#4B0082',
+  pink: '#C71585',
+  background: '#000000',
+  surface: '#1A1A1A',
+  text: '#FFFFFF',
+  textSecondary: '#E0E0E0',
+  textLight: '#FFFFFF',
+  border: '#FFFFFF',
+  success: '#00FF00',
+  error: '#FF0000',
+  warning: '#FFFF00',
+  info: '#00BFFF',
+  disabled: '#666666',
+  overlay: 'rgba(255, 255, 255, 0.2)',
+};
+
+export type ColorScheme = typeof colors;

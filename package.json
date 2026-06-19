@@ -1,0 +1,15 @@
+{
+  "name": "sains-tahun-1-6-bijak",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sains Tahun 1-6 Bijak — Aplikasi pembelajaran Sains KSSR untuk murid Tahun 1 hingga 6",
+  "scripts": {
+    "backend": "npm run dev --prefix backend",
+    "admin": "npm run dev --prefix admin",
+    "mobile": "npm start --prefix mobile",
+    "db:seed": "npm run db:seed --prefix backend",
+    "install:all": "npm install --prefix backend && npm install --prefix admin && npm install --prefix mobile",
+    "build:all": "npm run build --prefix backend && npm run build --prefix admin"
+  },
+  "keywords": ["sains", "kssr", "malaysia", "education", "expo", "react-native"]
+}

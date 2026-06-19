@@ -1,0 +1,25 @@
+# Deploy di https://render.com (percuma)
+# 1. Buat akaun Render
+# 2. Buat PostgreSQL percuma di https://neon.tech (salin connection string)
+# 3. Dashboard Render → New → Blueprint → sambung repo GitHub
+services:
+  - type: web
+    name: sains-bijak-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: RUN_SEED
+        value: "true"

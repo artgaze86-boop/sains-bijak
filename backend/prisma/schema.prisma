@@ -1,0 +1,318 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  PARENT
+  TEACHER
+  ADMIN
+}
+
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  MATCH
+  FILL_BLANK
+  PICTURE
+  DRAG_DROP
+  KBAT
+}
+
+enum SubscriptionType {
+  PARENT
+  SCHOOL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  password   String
+  role       Role
+  name       String
+  classCode  String?
+  yearLevel  Int?
+  isPremium  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  profile            Profile?
+  parentLinks        ParentChildLink[] @relation("ParentUser")
+  childLinks         ParentChildLink[] @relation("ChildUser")
+  quizAttempts       QuizAttempt[]
+  userBadges         UserBadge[]
+  flashcardFavorites FlashcardFavorite[]
+  topicProgress      TopicProgress[]
+  subscriptions      Subscription[]
+  teachingClasses    Class[]             @relation("TeacherClasses")
+  classMemberships   ClassStudent[]
+}
+
+model Profile {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  avatar        String  @default("default")
+  dyslexiaFont  Boolean @default(false)
+  highContrast  Boolean @default(false)
+  audioEnabled  Boolean @default(true)
+  settings      String  @default("{}")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ParentChildLink {
+  id       String @id @default(cuid())
+  parentId String
+  childId  String
+
+  parent User @relation("ParentUser", fields: [parentId], references: [id], onDelete: Cascade)
+  child  User @relation("ChildUser", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, childId])
+}
+
+model YearLevel {
+  id          String  @id @default(cuid())
+  year        Int     @unique
+  title       String
+  description String
+  color       String
+  icon        String
+  imageUrl    String?
+
+  topics Topic[]
+}
+
+model Topic {
+  id           String  @id @default(cuid())
+  yearLevelId  String
+  title        String
+  slug         String  @unique
+  description  String
+  icon         String
+  imageUrl     String?
+  order        Int
+  isFreeSample Boolean @default(false)
+
+  yearLevel   YearLevel        @relation(fields: [yearLevelId], references: [id], onDelete: Cascade)
+  notes       Note[]
+  quizzes     Quiz[]
+  experiments Experiment[]
+  flashcards  Flashcard[]
+  videos      LearningVideo[]
+  progress    TopicProgress[]
+  assignments TeacherAssignment[]
+}
+
+model LearningVideo {
+  id          String  @id @default(cuid())
+  topicId     String
+  title       String
+  description String
+  type        String  @default("slides")
+  youtubeId   String?
+  slidesJson  String?
+  durationMin Int     @default(3)
+  order       Int     @default(1)
+  thumbnailUrl String?
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+}
+
+model Note {
+  id          String  @id @default(cuid())
+  topicId     String
+  explanation String
+  keyPoints   String
+  vocabulary  String
+  funFact     String
+  recap       String
+  icon        String
+  imageUrl    String?
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+}
+
+model Quiz {
+  id      String @id @default(cuid())
+  topicId String
+  title   String
+
+  topic       Topic               @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+  assignments TeacherAssignment[]
+}
+
+model QuizQuestion {
+  id            String       @id @default(cuid())
+  quizId        String
+  type          QuestionType
+  question      String
+  options       String
+  correctAnswer String
+  explanation   String
+  imageUrl      String?
+  order         Int
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  quizId      String
+  topicId     String
+  score       Int
+  stars       Int
+  answers     String
+  completedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model Badge {
+  id          String @id @default(cuid())
+  code        String @unique
+  name        String
+  description String
+  icon        String
+  yearLevel   Int?
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+}
+
+model Experiment {
+  id                    String @id @default(cuid())
+  topicId               String
+  yearLevel             Int
+  title                 String
+  materials             String
+  safetyReminder        String
+  steps                 String
+  observationQuestions  String
+  learningOutcome       String
+  supervisionReminder   String
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+}
+
+model Game {
+  id           String @id @default(cuid())
+  yearLevel    Int
+  type         String
+  title        String
+  description  String
+  instructions String
+  config       String
+  difficulty   Int    @default(1)
+}
+
+model Flashcard {
+  id        String  @id @default(cuid())
+  topicId   String
+  front     String
+  back      String
+  imageUrl  String?
+  audioUrl  String?
+  category  String
+
+  topic     Topic               @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  favorites FlashcardFavorite[]
+}
+
+model FlashcardFavorite {
+  id          String @id @default(cuid())
+  userId      String
+  flashcardId String
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flashcard Flashcard @relation(fields: [flashcardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, flashcardId])
+}
+
+model Class {
+  id        String @id @default(cuid())
+  name      String
+  code      String @unique
+  teacherId String
+
+  teacher     User                @relation("TeacherClasses", fields: [teacherId], references: [id], onDelete: Cascade)
+  students    ClassStudent[]
+  assignments TeacherAssignment[]
+}
+
+model ClassStudent {
+  id        String @id @default(cuid())
+  classId   String
+  studentId String
+
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+}
+
+model TeacherAssignment {
+  id         String    @id @default(cuid())
+  classId    String
+  topicId    String?
+  quizId     String?
+  assignedAt DateTime  @default(now())
+  dueDate    DateTime?
+
+  class Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  topic Topic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  quiz  Quiz?  @relation(fields: [quizId], references: [id], onDelete: SetNull)
+}
+
+model TopicProgress {
+  id                   String   @id @default(cuid())
+  userId               String
+  topicId              String
+  notesCompleted       Boolean  @default(false)
+  quizCompleted        Boolean  @default(false)
+  experimentCompleted  Boolean  @default(false)
+  gameCompleted        Boolean  @default(false)
+  flashcardsReviewed   Int      @default(0)
+  lastAccessed         DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+}
+
+model Subscription {
+  id        String             @id @default(cuid())
+  userId    String
+  type      SubscriptionType
+  status    SubscriptionStatus @default(ACTIVE)
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: sainsbijak
+      POSTGRES_PASSWORD: sainsbijak123
+      POSTGRES_DB: sainsbijak
+    volumes:
+      - sainsbijak_pg:/var/lib/postgresql/data
+
+volumes:
+  sainsbijak_pg:
